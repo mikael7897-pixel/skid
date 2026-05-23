@@ -1,29 +1,29 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .upload-box { border: 2px dashed #ccc; padding: 40px; text-align: center; cursor: pointer; }
-        #output-container { margin-top: 20px; display: flex; gap: 20px; }
-        .code-block { background: #f4f4f4; padding: 15px; width: 45%; overflow-x: auto; white-space: pre-wrap; }
-    </style>
-</head>
-<body>
-    <h1>Symbol Getter</h1>
-    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-        <p>Click to upload libil2cpp.so</p>
-        <input type="file" id="fileInput" hidden />
-    </div>
+<script>
+    document.getElementById('fileInput').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        const resultDiv = document.getElementById('result');
+        
+        if (!file) return;
 
-    <div id="output-container">
-        <pre id="raw-output" class="code-block">Waiting for file...</pre>
-        <pre id="exports-output" class="code-block">Waiting for file...</pre>
-    </div>
+        resultDiv.innerText = "Processing...";
+        const arrayBuffer = await file.arrayBuffer();
+        const binary = lief.parse(new Uint8Array(arrayBuffer));
+        
+        let rawOutput = "const raw = {\n";
+        let configOutput = "Il2Cpp.$config.exports = {\n";
 
-    <script src="https://unpkg.com/lief@0.14.0/dist/lief.js"></script>
-    <script>
-        document.getElementById('fileInput').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+        for (const s of binary.exported_symbols) {
+            if (s.name.startsWith("il2cpp_")) {
+                const line = `  "${s.name}": "${s.name}",\n`;
+                rawOutput += line;
+                configOutput += line;
+            }
+        }
+        
+        rawOutput += "};";
+        configOutput += "};";
 
-            const array
+        // Display both formats together
+        resultDiv.innerText = rawOutput + "\n\n" + configOutput;
+    });
+</script>
