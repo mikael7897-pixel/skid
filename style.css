@@ -1,3 +1,18 @@
-body { font-family: sans-serif; padding: 20px; }
-.box { border: 2px dashed #ccc; padding: 20px; border-radius: 10px; }
-#result { background: #f4f4f4; padding: 15px; margin-top: 20px; white-space: pre-wrap; }
+body { font-family: sans-serif; display: flex; justify-content: center; padding-top: 50px; }
+.container { text-align: center; width: 80%; max-width: 600px; }
+.upload-box {
+    border: 2px dashed #ccc;
+    border-radius: 15px;
+    padding: 40px;
+    cursor: pointer;
+    background-color: #fafafa;
+    margin-top: 20px;
+}
+.upload-box:hover { border-color: #888; background-color: #f0f0f0; }
+#result { 
+    margin-top: 20px; 
+    text-align: left; 
+    background: #f4f4f4; 
+    padding: 15px; 
+    white-space: pre-wrap; 
+}
