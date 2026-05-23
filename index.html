@@ -1,61 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Symbol Getter</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container">
-        <h1>Symbol Getter</h1>
-        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-            <p><strong>Upload libil2cpp.so</strong></p>
-            <input type="file" id="fileInput" hidden />
-        </div>
-        <pre id="result"></pre>
-    </div>
+<form id="uploadForm">
+    <input type="file" id="fileInput" name="file">
+    <button type="submit">Get Symbols</button>
+</form>
+<pre id="result"></pre>
 
-    <script src="https://cdn.jsdelivr.net/npm/lief@0.14.0/dist/lief.js"></script>
-    <script>
-        // Initialize the library
-        let LIEF_READY = false;
-        lief.init().then(() => {
-            LIEF_READY = true;
-            console.log("LIEF is ready!");
-        });
-
-        document.getElementById('fileInput').addEventListener('change', async (e) => {
-            if (!LIEF_READY) {
-                alert("LIEF is still loading, please wait a second...");
-                return;
-            }
-
-            const file = e.target.files[0];
-            const resultDiv = document.getElementById('result');
-            if (!file) return;
-
-            resultDiv.innerText = "Processing...";
-            
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const binary = lief.parse(new Uint8Array(arrayBuffer));
-                
-                let rawOutput = "const raw = {\n";
-                let configOutput = "Il2Cpp.$config.exports = {\n";
-
-                for (const s of binary.exported_symbols) {
-                    if (s.name.startsWith("il2cpp_")) {
-                        const line = `  "${s.name}": "${s.name}",\n`;
-                        rawOutput += line;
-                        configOutput += line;
-                    }
-                }
-                
-                resultDiv.innerText = rawOutput + "};\n\n" + configOutput + "};";
-            } catch (err) {
-                resultDiv.innerText = "Error: " + err.message;
-            }
-        });
-    </script>
-</body>
-</html>
+<script>
+    document.getElementById('uploadForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append("file", document.getElementById('fileInput').files[0]);
+        
+        // This sends the file to your Python backend
+        const response = await fetch('/api/get-symbols', { method: 'POST', body: formData });
+        const data = await response.json();
+        document.getElementById('result').innerText = data.symbols;
+    };
+</script>
