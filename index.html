@@ -1,29 +1,34 @@
-<script>
-    document.getElementById('fileInput').addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        const resultDiv = document.getElementById('result');
-        
-        if (!file) return;
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Symbol Getter</title>
+</head>
+<body>
+    <h1>Symbol Getter</h1>
+    <input type="file" id="fileInput" />
+    <button onclick="processFile()">Get Symbols</button>
+    <pre id="result"></pre>
 
-        resultDiv.innerText = "Processing...";
-        const arrayBuffer = await file.arrayBuffer();
-        const binary = lief.parse(new Uint8Array(arrayBuffer));
-        
-        let rawOutput = "const raw = {\n";
-        let configOutput = "Il2Cpp.$config.exports = {\n";
-
-        for (const s of binary.exported_symbols) {
-            if (s.name.startsWith("il2cpp_")) {
-                const line = `  "${s.name}": "${s.name}",\n`;
-                rawOutput += line;
-                configOutput += line;
+    <script src="https://unpkg.com/lief@0.14.0/dist/lief.js"></script>
+    <script>
+        async function processFile() {
+            const file = document.getElementById('fileInput').files[0];
+            const resultDiv = document.getElementById('result');
+            if (!file) return alert("Select a file!");
+            resultDiv.innerText = "Processing...";
+            const arrayBuffer = await file.arrayBuffer();
+            const binary = lief.parse(new Uint8Array(arrayBuffer));
+            let rawOutput = "const raw = {\n";
+            let configOutput = "Il2Cpp.$config.exports = {\n";
+            for (const s of binary.exported_symbols) {
+                if (s.name.startsWith("il2cpp_")) {
+                    const line = `  "${s.name}": "${s.name}",\n`;
+                    rawOutput += line;
+                    configOutput += line;
+                }
             }
+            resultDiv.innerText = rawOutput + "\n};\n\n" + configOutput + "\n};";
         }
-        
-        rawOutput += "};";
-        configOutput += "};";
-
-        // Display both formats together
-        resultDiv.innerText = rawOutput + "\n\n" + configOutput;
-    });
-</script>
+    </script>
+</body>
+</html>
