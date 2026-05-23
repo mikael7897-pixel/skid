@@ -1,34 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Symbol Getter</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Symbol Getter</h1>
-    <input type="file" id="fileInput" />
-    <button onclick="processFile()">Get Symbols</button>
-    <pre id="result"></pre>
+    <div class="container">
+        <h1>symbol getter</h1>
+        <p>upload the libil2cpp.so to get symbols</p>
+
+        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+            <div style="font-size: 40px;">📁</div>
+            <p><strong>upload the libil2cpp.so</strong></p>
+            <p><small>only for the libil2cpp.so</small></p>
+            <input type="file" id="fileInput" hidden />
+        </div>
+
+        <pre id="result"></pre>
+    </div>
 
     <script src="https://unpkg.com/lief@0.14.0/dist/lief.js"></script>
     <script>
-        async function processFile() {
-            const file = document.getElementById('fileInput').files[0];
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
             const resultDiv = document.getElementById('result');
-            if (!file) return alert("Select a file!");
+            if (!file) return;
+
             resultDiv.innerText = "Processing...";
-            const arrayBuffer = await file.arrayBuffer();
-            const binary = lief.parse(new Uint8Array(arrayBuffer));
-            let rawOutput = "const raw = {\n";
-            let configOutput = "Il2Cpp.$config.exports = {\n";
-            for (const s of binary.exported_symbols) {
-                if (s.name.startsWith("il2cpp_")) {
-                    const line = `  "${s.name}": "${s.name}",\n`;
-                    rawOutput += line;
-                    configOutput += line;
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const binary = lief.parse(new Uint8Array(arrayBuffer));
+                
+                let rawOutput = "const raw = {\n";
+                let configOutput = "Il2Cpp.$config.exports = {\n";
+
+                for (const s of binary.exported_symbols) {
+                    if (s.name.startsWith("il2cpp_")) {
+                        const line = `  "${s.name}": "${s.name}",\n`;
+                        rawOutput += line;
+                        configOutput += line;
+                    }
                 }
+                
+                resultDiv.innerText = rawOutput + "};\n\n" + configOutput + "};";
+            } catch (err) {
+                resultDiv.innerText = "Error: " + err.message;
+                console.error(err);
             }
-            resultDiv.innerText = rawOutput + "\n};\n\n" + configOutput + "\n};";
-        }
+        });
     </script>
 </body>
 </html>
