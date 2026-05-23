@@ -7,27 +7,35 @@
 </head>
 <body>
     <div class="container">
-        <h1>symbol getter</h1>
-        <p>upload the libil2cpp.so to get symbols</p>
-
+        <h1>Symbol Getter</h1>
         <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-            <div style="font-size: 40px;">📁</div>
-            <p><strong>upload the libil2cpp.so</strong></p>
-            <p><small>only for the libil2cpp.so</small></p>
+            <p><strong>Upload libil2cpp.so</strong></p>
             <input type="file" id="fileInput" hidden />
         </div>
-
         <pre id="result"></pre>
     </div>
 
-    <script src="lief.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lief@0.14.0/dist/lief.js"></script>
     <script>
+        // Initialize the library
+        let LIEF_READY = false;
+        lief.init().then(() => {
+            LIEF_READY = true;
+            console.log("LIEF is ready!");
+        });
+
         document.getElementById('fileInput').addEventListener('change', async (e) => {
+            if (!LIEF_READY) {
+                alert("LIEF is still loading, please wait a second...");
+                return;
+            }
+
             const file = e.target.files[0];
             const resultDiv = document.getElementById('result');
             if (!file) return;
 
             resultDiv.innerText = "Processing...";
+            
             try {
                 const arrayBuffer = await file.arrayBuffer();
                 const binary = lief.parse(new Uint8Array(arrayBuffer));
@@ -46,7 +54,6 @@
                 resultDiv.innerText = rawOutput + "};\n\n" + configOutput + "};";
             } catch (err) {
                 resultDiv.innerText = "Error: " + err.message;
-                console.error(err);
             }
         });
     </script>
