@@ -3,30 +3,25 @@
 <body>
     <h1>IL2CPP Symbol Getter</h1>
     <input type="file" id="fileInput" />
-    <button onclick="uploadFile()">Get Symbols</button>
-    
+    <button onclick="processFile()">Get Symbols</button>
     <pre id="result"></pre>
 
+    <script src="https://unpkg.com/lief@0.14.0/dist/lief.js"></script>
     <script>
-        async function uploadFile() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-            const resultDisplay = document.getElementById('result');
+        async function processFile() {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) return alert("Pick a file first!");
+
+            const arrayBuffer = await file.arrayBuffer();
+            const binary = lief.parse(new Uint8Array(arrayBuffer));
             
-            if (!file) return alert("Select a file first!");
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            resultDisplay.innerText = "Processing...";
-
-            const response = await fetch('/api/process', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.text();
-            resultDisplay.innerText = data; // Shows result instantly on page
+            let output = "";
+            for (const s of binary.exported_symbols) {
+                if (s.name.startsWith("il2cpp_")) {
+                    output += s.name + "\n";
+                }
+            }
+            document.getElementById('result').innerText = output;
         }
     </script>
 </body>
