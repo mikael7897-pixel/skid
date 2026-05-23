@@ -4,28 +4,38 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>IL2CPP Symbol Getter</h1>
-    <div class="box">
-        <input type="file" id="fileInput" />
-        <button onclick="processFile()">Get Symbols</button>
+    <div class="container">
+        <h1>symbol getter</h1>
+        <p>upload the libil2cpp.so to get symbols</p>
+
+        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+            <img src="https://cdn-icons-png.flaticon.com/512/126/126477.png" width="40">
+            <p><strong>upload the libil2cpp.so</strong></p>
+            <p><small>only for the libil2cpp.so</small></p>
+            <input type="file" id="fileInput" hidden />
+        </div>
+
+        <pre id="result"></pre>
     </div>
-    <pre id="result"></pre>
 
     <script src="https://unpkg.com/lief@0.14.0/dist/lief.js"></script>
     <script>
-        async function processFile() {
-            const file = document.getElementById('fileInput').files[0];
-            if (!file) return alert("Select a file!");
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerText = "Processing...";
             const arrayBuffer = await file.arrayBuffer();
             const binary = lief.parse(new Uint8Array(arrayBuffer));
+            
             let output = "Found Symbols:\n";
             for (const s of binary.exported_symbols) {
                 if (s.name.startsWith("il2cpp_")) {
                     output += s.name + "\n";
                 }
             }
-            document.getElementById('result').innerText = output;
-        }
+            resultDiv.innerText = output;
+        });
     </script>
 </body>
 </html>
