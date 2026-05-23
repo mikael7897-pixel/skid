@@ -1,41 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .upload-box { border: 2px dashed #ccc; padding: 40px; text-align: center; cursor: pointer; }
+        #output-container { margin-top: 20px; display: flex; gap: 20px; }
+        .code-block { background: #f4f4f4; padding: 15px; width: 45%; overflow-x: auto; white-space: pre-wrap; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Symbol Grabber For Frida Menus</h1>
-        <p>Upload Your libil2cpp.so</p>
+    <h1>Symbol Getter</h1>
+    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+        <p>Click to upload libil2cpp.so</p>
+        <input type="file" id="fileInput" hidden />
+    </div>
 
-        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-            <img src="https://www.pngplay.com/wp-content/uploads/8/Upload-Icon-Logo-Download-Free-PNG.png" width="40">
-            <p><strong>upload the libil2cpp.so</strong></p>
-            <p><small>only for the libil2cpp.so</small></p>
-            <input type="file" id="fileInput" hidden />
-        </div>
-
-        <pre id="result"></pre>
+    <div id="output-container">
+        <pre id="raw-output" class="code-block">Waiting for file...</pre>
+        <pre id="exports-output" class="code-block">Waiting for file...</pre>
     </div>
 
     <script src="https://unpkg.com/lief@0.14.0/dist/lief.js"></script>
     <script>
         document.getElementById('fileInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
-            const resultDiv = document.getElementById('result');
-            
-            resultDiv.innerText = "Processing...";
-            const arrayBuffer = await file.arrayBuffer();
-            const binary = lief.parse(new Uint8Array(arrayBuffer));
-            
-            let output = "Found Symbols:\n";
-            for (const s of binary.exported_symbols) {
-                if (s.name.startsWith("il2cpp_")) {
-                    output += s.name + "\n";
-                }
-            }
-            resultDiv.innerText = output;
-        });
-    </script>
-</body>
-</html>
+            if (!file) return;
+
+            const array
