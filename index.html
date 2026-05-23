@@ -2,9 +2,32 @@
 <html>
 <body>
     <h1>IL2CPP Symbol Getter</h1>
-    <form action="/api/index" method="POST" enctype="multipart/form-data">
-        <input type="file" name="file" />
-        <button type="submit">Upload libil2cpp.so</button>
-    </form>
+    <input type="file" id="fileInput" />
+    <button onclick="uploadFile()">Get Symbols</button>
+    
+    <pre id="result"></pre>
+
+    <script>
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const resultDisplay = document.getElementById('result');
+            
+            if (!file) return alert("Select a file first!");
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            resultDisplay.innerText = "Processing...";
+
+            const response = await fetch('/api/process', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.text();
+            resultDisplay.innerText = data; // Shows result instantly on page
+        }
+    </script>
 </body>
 </html>
